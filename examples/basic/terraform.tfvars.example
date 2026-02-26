@@ -1,0 +1,27 @@
+# Copy this file to terraform.tfvars and fill in your values:
+#   cp terraform.tfvars.example terraform.tfvars
+
+region = "us-east-1"
+
+vpc_id   = "vpc-0123456789abcdef0"
+vpc_cidr = "10.0.0.0/16"
+
+private_subnet_ids = [
+  "subnet-aaaa1111aaaa1111a", # private subnet — AZ 1
+  "subnet-bbbb2222bbbb2222b", # private subnet — AZ 2
+]
+
+ami_id        = "ami-your-custom-rhel-id"
+instance_type = "t3.medium"
+
+agent_api_base_url  = "https://abc123def4.execute-api.us-east-1.amazonaws.com/prod"
+agent_api_auth_mode = "iam"
+
+create_execute_api_vpce = true
+
+iam_instance_profile_name = "streamlit-ui-role"
+
+tags = {
+  Environment = "dev"
+  Project     = "chatbot-ui"
+}
