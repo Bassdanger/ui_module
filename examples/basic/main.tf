@@ -13,24 +13,22 @@ provider "aws" {
   region = var.region
 }
 
-module "chat_ui_ec2" {
-  source = "../../infra/chat_ui_ec2"
+module "chat_ui_ecs" {
+  source = "../../infra/chat_ui_ecs"
 
   vpc_id             = var.vpc_id
   private_subnet_ids = var.private_subnet_ids
-  ami_id             = var.ami_id
   region             = var.region
   vpc_cidrs          = var.vpc_cidrs
-  instance_type      = var.instance_type
 
   agent_api_base_url  = var.agent_api_base_url
   agent_api_auth_mode = var.agent_api_auth_mode
 
-  create_app_s3_bucket = var.create_app_s3_bucket
-  app_s3_bucket        = var.app_s3_bucket
-  app_s3_key           = var.app_s3_key
+  container_image       = var.container_image
+  create_ecr_repository = true
 
-  create_execute_api_vpce = var.create_execute_api_vpce
+  create_execute_api_vpce  = var.create_execute_api_vpce
+  create_s3_gateway_endpoint = true
 
   tags = var.tags
 }

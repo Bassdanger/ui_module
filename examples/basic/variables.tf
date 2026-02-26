@@ -8,11 +8,6 @@ variable "private_subnet_ids" {
   description = "Two private subnet IDs (across AZs)"
 }
 
-variable "ami_id" {
-  type        = string
-  description = "Custom RHEL AMI ID for the Streamlit UI EC2 instances"
-}
-
 variable "region" {
   type        = string
   description = "AWS region"
@@ -21,12 +16,6 @@ variable "region" {
 variable "vpc_cidrs" {
   type        = list(string)
   description = "VPC CIDR blocks for security group rules"
-}
-
-variable "instance_type" {
-  type        = string
-  default     = "t3.medium"
-  description = "EC2 instance type"
 }
 
 variable "agent_api_base_url" {
@@ -40,22 +29,10 @@ variable "agent_api_auth_mode" {
   description = "Auth mode for the agent API: iam, api_key, or none"
 }
 
-variable "create_app_s3_bucket" {
-  type        = bool
-  default     = false
-  description = "When true, the module creates and manages the S3 artifact bucket"
-}
-
-variable "app_s3_bucket" {
+variable "container_image" {
   type        = string
   default     = ""
-  description = "Existing S3 bucket name for the ui_module artifact (ignored when create_app_s3_bucket = true)"
-}
-
-variable "app_s3_key" {
-  type        = string
-  default     = "ui_module/ui_module.tar.gz"
-  description = "S3 object key for the ui_module tar.gz artifact"
+  description = "Full container image URI. Leave empty to use the ECR repo the module creates."
 }
 
 variable "create_execute_api_vpce" {

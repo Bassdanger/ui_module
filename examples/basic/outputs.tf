@@ -1,29 +1,34 @@
-output "ui_security_group_id" {
-  description = "Security group ID for the Streamlit UI EC2 instances"
-  value       = module.chat_ui_ec2.ui_security_group_id
+output "ecr_repository_url" {
+  description = "ECR repository URL — push your container image here"
+  value       = module.chat_ui_ecs.ecr_repository_url
 }
 
-output "vpce_security_group_id" {
-  description = "Security group ID for VPC interface endpoints"
-  value       = module.chat_ui_ec2.vpce_security_group_id
+output "alb_dns_name" {
+  description = "Internal ALB DNS name (stable private endpoint for the UI)"
+  value       = module.chat_ui_ecs.alb_dns_name
 }
 
-output "asg_name" {
-  description = "Auto Scaling Group name"
-  value       = module.chat_ui_ec2.asg_name
+output "ecs_cluster_name" {
+  description = "ECS cluster name"
+  value       = module.chat_ui_ecs.ecs_cluster_name
 }
 
-output "launch_template_id" {
-  description = "Launch template ID"
-  value       = module.chat_ui_ec2.launch_template_id
+output "ecs_service_name" {
+  description = "ECS service name"
+  value       = module.chat_ui_ecs.ecs_service_name
+}
+
+output "task_security_group_id" {
+  description = "Security group ID for Fargate tasks"
+  value       = module.chat_ui_ecs.task_security_group_id
+}
+
+output "alb_security_group_id" {
+  description = "Security group ID for the internal ALB"
+  value       = module.chat_ui_ecs.alb_security_group_id
 }
 
 output "execute_api_vpce_id" {
   description = "Execute-api VPC endpoint ID (empty if not created)"
-  value       = module.chat_ui_ec2.execute_api_vpce_id
-}
-
-output "app_s3_bucket_name" {
-  description = "S3 bucket used for the ui_module artifact"
-  value       = module.chat_ui_ec2.app_s3_bucket_name
+  value       = module.chat_ui_ecs.execute_api_vpce_id
 }

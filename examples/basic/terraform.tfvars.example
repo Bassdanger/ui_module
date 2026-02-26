@@ -3,7 +3,8 @@
 
 region = "us-east-1"
 
-vpc_id   = "vpc-0123456789abcdef0"
+vpc_id = "vpc-0123456789abcdef0"
+
 vpc_cidrs = [
   "10.0.0.0/16",   # primary VPC CIDR
   "10.1.0.0/16",   # secondary VPC CIDR
@@ -14,23 +15,12 @@ private_subnet_ids = [
   "subnet-bbbb2222bbbb2222b", # private subnet — AZ 2
 ]
 
-ami_id        = "ami-your-custom-rhel-id"
-instance_type = "t3.medium"
+# Leave empty on first apply — the module creates an ECR repo.
+# After pushing your image, set this to the full image URI to pin a
+# specific tag, e.g. "123456789012.dkr.ecr.us-east-1.amazonaws.com/chat-ui-app:v1"
+container_image = ""
 
-# S3 artifact bucket — choose one of the two options below:
-#
-# Option A: Let the module create and manage the bucket (recommended).
-#   terraform apply, then upload the artifact:
-#     tar -czf ui_module.tar.gz -C . ui_module/ requirements.txt
-#     aws s3 cp ui_module.tar.gz s3://$(terraform output -raw app_s3_bucket_name)/ui_module/ui_module.tar.gz
-create_app_s3_bucket = true
-
-# Option B: Bring your own bucket (set create_app_s3_bucket = false).
-# app_s3_bucket = "my-existing-bucket"
-
-app_s3_key = "ui_module/ui_module.tar.gz"
-
-agent_api_base_url  = "https://abc123def4.execute-api.us-east-1.amazonaws.com/prod"
+agent_api_base_url  = "https://abc123def4.execute-api.us-east-1.amazonaws.com"
 agent_api_auth_mode = "iam"
 
 create_execute_api_vpce = true
