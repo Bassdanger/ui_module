@@ -22,3 +22,8 @@ output "execute_api_vpce_id" {
   description = "Execute-api VPC endpoint ID (empty if not created)"
   value       = module.chat_ui_ec2.execute_api_vpce_id
 }
+
+output "app_s3_bucket_name" {
+  description = "S3 bucket used for the ui_module artifact"
+  value       = module.chat_ui_ec2.app_s3_bucket_name
+}

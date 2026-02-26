@@ -14,6 +14,10 @@ locals {
   common_tags = merge(var.tags, {
     Module = "chat-ui-ec2"
   })
+
+  # Resolves to the managed bucket when create_app_s3_bucket = true,
+  # otherwise falls back to the caller-supplied bucket name.
+  effective_app_s3_bucket = var.create_app_s3_bucket ? aws_s3_bucket.app_artifact[0].id : var.app_s3_bucket
 }
 
 # ------------------------------------------------------------------------------
@@ -22,6 +26,52 @@ locals {
 
 data "aws_vpc" "this" {
   id = var.vpc_id
+}
+
+# ------------------------------------------------------------------------------
+# S3 Artifact Bucket (optional — enabled by create_app_s3_bucket)
+# ------------------------------------------------------------------------------
+
+resource "aws_s3_bucket" "app_artifact" {
+  count = var.create_app_s3_bucket ? 1 : 0
+
+  bucket_prefix = "${local.name_prefix}-artifact-"
+  force_destroy = false
+
+  tags = merge(local.common_tags, { Name = "${local.name_prefix}-artifact" })
+}
+
+resource "aws_s3_bucket_versioning" "app_artifact" {
+  count = var.create_app_s3_bucket ? 1 : 0
+
+  bucket = aws_s3_bucket.app_artifact[0].id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "app_artifact" {
+  count = var.create_app_s3_bucket ? 1 : 0
+
+  bucket = aws_s3_bucket.app_artifact[0].id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "app_artifact" {
+  count = var.create_app_s3_bucket ? 1 : 0
+
+  bucket = aws_s3_bucket.app_artifact[0].id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 # ------------------------------------------------------------------------------
@@ -139,6 +189,24 @@ resource "aws_iam_role_policy" "execute_api_invoke" {
   })
 }
 
+resource "aws_iam_role_policy" "s3_app_artifact" {
+  count = local.effective_app_s3_bucket != "" ? 1 : 0
+
+  name = "${local.name_prefix}-s3-app-artifact"
+  role = aws_iam_role.ui.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["s3:GetObject"]
+        Resource = "arn:aws:s3:::${local.effective_app_s3_bucket}/${var.app_s3_key}"
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role_policy_attachment" "additional" {
   for_each = toset(var.additional_iam_policy_arns)
 
@@ -166,6 +234,7 @@ resource "aws_launch_template" "ui" {
     agent_api_base_url  = var.agent_api_base_url
     agent_api_auth_mode = var.agent_api_auth_mode
     aws_region          = var.region
+    app_s3_uri          = local.effective_app_s3_bucket != "" ? "s3://${local.effective_app_s3_bucket}/${var.app_s3_key}" : ""
   }))
 
   metadata_options {

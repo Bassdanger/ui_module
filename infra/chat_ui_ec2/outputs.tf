@@ -42,3 +42,8 @@ output "additional_vpce_ids" {
   description = "Map of additional VPC endpoint service suffix to endpoint ID"
   value       = { for k, v in aws_vpc_endpoint.additional : k => v.id }
 }
+
+output "app_s3_bucket_name" {
+  description = "Name of the S3 bucket used for the ui_module artifact (empty string if not managed by this module)"
+  value       = local.effective_app_s3_bucket
+}

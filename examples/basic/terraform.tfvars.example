@@ -17,6 +17,19 @@ private_subnet_ids = [
 ami_id        = "ami-your-custom-rhel-id"
 instance_type = "t3.medium"
 
+# S3 artifact bucket — choose one of the two options below:
+#
+# Option A: Let the module create and manage the bucket (recommended).
+#   terraform apply, then upload the artifact:
+#     tar -czf ui_module.tar.gz -C . ui_module/ requirements.txt
+#     aws s3 cp ui_module.tar.gz s3://$(terraform output -raw app_s3_bucket_name)/ui_module/ui_module.tar.gz
+create_app_s3_bucket = true
+
+# Option B: Bring your own bucket (set create_app_s3_bucket = false).
+# app_s3_bucket = "my-existing-bucket"
+
+app_s3_key = "ui_module/ui_module.tar.gz"
+
 agent_api_base_url  = "https://abc123def4.execute-api.us-east-1.amazonaws.com/prod"
 agent_api_auth_mode = "iam"
 

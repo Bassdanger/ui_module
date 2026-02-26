@@ -99,6 +99,24 @@ variable "asg_desired_capacity" {
   description = "Desired number of EC2 instances in the ASG"
 }
 
+variable "create_app_s3_bucket" {
+  type        = bool
+  default     = false
+  description = "When true, the module creates a private, versioned S3 bucket for the ui_module artifact and grants the EC2 role read access. Set to false to provide an existing bucket via app_s3_bucket."
+}
+
+variable "app_s3_bucket" {
+  type        = string
+  default     = ""
+  description = "Name of an existing S3 bucket containing the packaged ui_module artifact (tar.gz). Ignored when create_app_s3_bucket = true."
+}
+
+variable "app_s3_key" {
+  type        = string
+  default     = "ui_module/ui_module.tar.gz"
+  description = "S3 object key for the ui_module tar.gz artifact"
+}
+
 variable "tags" {
   type        = map(string)
   default     = {}

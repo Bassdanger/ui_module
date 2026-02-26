@@ -26,6 +26,10 @@ module "chat_ui_ec2" {
   agent_api_base_url  = var.agent_api_base_url
   agent_api_auth_mode = var.agent_api_auth_mode
 
+  create_app_s3_bucket = var.create_app_s3_bucket
+  app_s3_bucket        = var.app_s3_bucket
+  app_s3_key           = var.app_s3_key
+
   create_execute_api_vpce = var.create_execute_api_vpce
 
   tags = var.tags

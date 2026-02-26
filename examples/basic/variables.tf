@@ -40,6 +40,24 @@ variable "agent_api_auth_mode" {
   description = "Auth mode for the agent API: iam, api_key, or none"
 }
 
+variable "create_app_s3_bucket" {
+  type        = bool
+  default     = false
+  description = "When true, the module creates and manages the S3 artifact bucket"
+}
+
+variable "app_s3_bucket" {
+  type        = string
+  default     = ""
+  description = "Existing S3 bucket name for the ui_module artifact (ignored when create_app_s3_bucket = true)"
+}
+
+variable "app_s3_key" {
+  type        = string
+  default     = "ui_module/ui_module.tar.gz"
+  description = "S3 object key for the ui_module tar.gz artifact"
+}
+
 variable "create_execute_api_vpce" {
   type        = bool
   default     = true

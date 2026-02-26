@@ -13,7 +13,7 @@ Private Streamlit chatbot UI deployed on EC2 in AWS private subnets, backed by a
 │       ├── chat_panel.py       # Conversation history and input
 │       └── sidebar.py          # Settings controls
 ├── infra/chat_ui_ec2/          # Terraform module
-│   ├── main.tf                 # EC2 ASG, SGs, VPC endpoints
+│   ├── main.tf                 # EC2 ASG, S3 bucket, SGs, IAM, VPC endpoints
 │   ├── variables.tf            # Module inputs
 │   ├── outputs.tf              # Module outputs
 │   └── templates/
@@ -29,13 +29,16 @@ Private Streamlit chatbot UI deployed on EC2 in AWS private subnets, backed by a
 ## Prerequisites
 
 - An existing AWS VPC with **two private subnets** (no public subnets required).
-- A **custom RHEL AMI** with Python, Streamlit, and this `ui_module` package installed at `/opt/ui_module`.
+- A **custom RHEL AMI** with Python 3 and the AWS CLI installed.
+- An **S3 VPC Gateway endpoint** on the private subnet route tables so instances can reach S3 without a NAT gateway (required when using the S3 artifact deployment).
 - A **private API Gateway** endpoint for your agent (the module can create the `execute-api` VPC endpoint for you).
 - Terraform >= 1.3 and AWS provider ~> 5.0.
 
 ## Quick start
 
 ### 1. Deploy the infrastructure
+
+Set `create_app_s3_bucket = true` in your `terraform.tfvars` to let the module create and manage the S3 artifact bucket, then apply:
 
 ```bash
 cd examples/basic
@@ -45,7 +48,38 @@ terraform init
 terraform apply
 ```
 
-### 2. Verify the deployment
+### 2. Package and upload the application
+
+After the bucket is created, build the tarball and upload it:
+
+```bash
+tar -czf ui_module.tar.gz -C . ui_module/ requirements.txt
+aws s3 cp ui_module.tar.gz \
+  s3://$(cd examples/basic && terraform output -raw app_s3_bucket_name)/ui_module/ui_module.tar.gz
+```
+
+### 3. Cycle the instance so it picks up the artifact
+
+Terminate the running instance(s) — the ASG replaces them automatically and the new instance downloads the artifact on first boot:
+
+```bash
+aws autoscaling terminate-instance-in-auto-scaling-group \
+  --instance-id <instance-id> \
+  --should-decrement-desired-capacity false \
+  --region <region>
+```
+
+### 4. Verify the deployment
+
+```bash
+cd examples/basic
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with your VPC, subnet, AMI, S3, and API values
+terraform init
+terraform apply
+```
+
+### 5. Verify the deployment
 
 The EC2 instance created by this module runs in a private subnet and starts
 Streamlit automatically via user data. To troubleshoot or manually restart
@@ -59,10 +93,13 @@ aws ssm start-session --target <instance-id> --region <region>
 Once connected:
 
 ```bash
+# Check user-data bootstrap logs
+tail -f /var/log/user-data.log
+
 # Check if Streamlit is running
 ps aux | grep streamlit
 
-# View logs
+# View application logs
 tail -f /var/log/streamlit-ui.log
 
 # Restart manually if needed
@@ -70,7 +107,7 @@ cd /opt/ui_module
 streamlit run app.py --server.port 8501 --server.address 0.0.0.0
 ```
 
-### 3. Access the UI
+### 6. Access the UI
 
 The Streamlit UI listens on port **8501** on the EC2 instance's private IP.
 Because everything runs in private subnets, you must be **inside the VPC**
@@ -132,4 +169,7 @@ See [`infra/chat_ui_ec2/variables.tf`](infra/chat_ui_ec2/variables.tf) for the f
 | `vpc_cidrs` | `list(string)` | Yes | VPC CIDR blocks for SG ingress rules |
 | `ami_id` | `string` | Yes | Custom RHEL AMI ID |
 | `region` | `string` | Yes | AWS region |
+| `create_app_s3_bucket` | `bool` | No (default `false`) | Create and manage the S3 artifact bucket |
+| `app_s3_bucket` | `string` | No (default `""`) | Existing S3 bucket name (ignored when `create_app_s3_bucket = true`) |
+| `app_s3_key` | `string` | No (default `"ui_module/ui_module.tar.gz"`) | S3 object key for the artifact |
 | `create_execute_api_vpce` | `bool` | No (default `true`) | Create execute-api VPC endpoint |
