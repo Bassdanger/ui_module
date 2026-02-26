@@ -28,7 +28,7 @@ Private Streamlit chatbot UI deployed on ECS Fargate in AWS private subnets, fro
 ## Prerequisites
 
 - An existing AWS VPC with **two private subnets** (no public subnets required).
-- **Docker** installed locally (to build and push the container image).
+- **Podman** (aliased as `docker`) or Docker installed locally to build and push the container image.
 - A **private API Gateway** endpoint for your agent (the module can create the `execute-api` VPC endpoint for you).
 - Terraform >= 1.3 and AWS provider ~> 5.0.
 
@@ -51,14 +51,15 @@ This creates the ECR repository, ECS cluster, Fargate service, internal ALB, IAM
 ```bash
 # Get the ECR repo URL from Terraform output
 ECR_URL=$(cd examples/basic && terraform output -raw ecr_repository_url)
+REGISTRY=$(echo "$ECR_URL" | cut -d/ -f1)
 
-# Authenticate Docker with ECR
+# Authenticate with ECR (works with both Podman and Docker)
 aws ecr get-login-password --region <region> | \
-  docker login --username AWS --password-stdin "$ECR_URL"
+  podman login --username AWS --password-stdin "$REGISTRY"
 
 # Build and push
-docker build -t "$ECR_URL:latest" .
-docker push "$ECR_URL:latest"
+podman build -t "$ECR_URL:latest" .
+podman push "$ECR_URL:latest"
 ```
 
 ### 3. Deploy the new image
@@ -153,7 +154,7 @@ See [`infra/chat_ui_ecs/variables.tf`](infra/chat_ui_ecs/variables.tf) for the f
 
 | Output | Description |
 |---|---|
-| `ecr_repository_url` | ECR repo URL for `docker push` |
+| `ecr_repository_url` | ECR repo URL for `podman push` |
 | `alb_dns_name` | Stable private DNS for the UI |
 | `ecs_cluster_name` | ECS cluster name |
 | `ecs_service_name` | ECS service name |
