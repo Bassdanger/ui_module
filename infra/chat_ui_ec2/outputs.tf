@@ -1,3 +1,18 @@
+output "iam_role_name" {
+  description = "Name of the IAM role attached to the UI EC2 instances"
+  value       = aws_iam_role.ui.name
+}
+
+output "iam_role_arn" {
+  description = "ARN of the IAM role attached to the UI EC2 instances"
+  value       = aws_iam_role.ui.arn
+}
+
+output "iam_instance_profile_name" {
+  description = "Name of the IAM instance profile attached to the UI EC2 instances"
+  value       = aws_iam_instance_profile.ui.name
+}
+
 output "ui_security_group_id" {
   description = "Security group ID attached to the Streamlit UI EC2 instances"
   value       = aws_security_group.ui.id

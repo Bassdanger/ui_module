@@ -87,6 +87,66 @@ resource "aws_vpc_security_group_egress_rule" "vpce_all_outbound" {
 }
 
 # ------------------------------------------------------------------------------
+# IAM Role & Instance Profile
+# ------------------------------------------------------------------------------
+
+resource "aws_iam_role" "ui" {
+  name = "${local.name_prefix}-ec2-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = { Service = "ec2.amazonaws.com" }
+        Action    = "sts:AssumeRole"
+      }
+    ]
+  })
+
+  tags = merge(local.common_tags, { Name = "${local.name_prefix}-ec2-role" })
+}
+
+resource "aws_iam_instance_profile" "ui" {
+  name = "${local.name_prefix}-ec2-profile"
+  role = aws_iam_role.ui.name
+
+  tags = merge(local.common_tags, { Name = "${local.name_prefix}-ec2-profile" })
+}
+
+resource "aws_iam_role_policy_attachment" "ssm" {
+  count = var.enable_ssm ? 1 : 0
+
+  role       = aws_iam_role.ui.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy" "execute_api_invoke" {
+  count = var.agent_api_auth_mode == "iam" ? 1 : 0
+
+  name = "${local.name_prefix}-execute-api-invoke"
+  role = aws_iam_role.ui.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "execute-api:Invoke"
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "additional" {
+  for_each = toset(var.additional_iam_policy_arns)
+
+  role       = aws_iam_role.ui.name
+  policy_arn = each.value
+}
+
+# ------------------------------------------------------------------------------
 # Launch Template
 # ------------------------------------------------------------------------------
 
@@ -97,11 +157,8 @@ resource "aws_launch_template" "ui" {
 
   vpc_security_group_ids = [aws_security_group.ui.id]
 
-  dynamic "iam_instance_profile" {
-    for_each = var.iam_instance_profile_name != "" ? [1] : []
-    content {
-      name = var.iam_instance_profile_name
-    }
+  iam_instance_profile {
+    name = aws_iam_instance_profile.ui.name
   }
 
   user_data = base64encode(templatefile("${path.module}/templates/user_data.sh", {

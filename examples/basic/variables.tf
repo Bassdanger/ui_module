@@ -46,12 +46,6 @@ variable "create_execute_api_vpce" {
   description = "Whether to create an execute-api VPC endpoint"
 }
 
-variable "iam_instance_profile_name" {
-  type        = string
-  default     = ""
-  description = "Optional IAM instance profile to attach to the UI EC2"
-}
-
 variable "tags" {
   type        = map(string)
   default     = {}

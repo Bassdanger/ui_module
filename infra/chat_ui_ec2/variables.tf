@@ -40,10 +40,16 @@ variable "vpc_cidrs" {
   description = "VPC CIDR blocks used for security group ingress rules"
 }
 
-variable "iam_instance_profile_name" {
-  type        = string
-  default     = ""
-  description = "Optional IAM instance profile name to attach to UI EC2 instances (for API auth, SSM, CloudWatch, etc.)"
+variable "enable_ssm" {
+  type        = bool
+  default     = true
+  description = "Attach SSM managed policy to the IAM role so you can use Session Manager to connect to the instance"
+}
+
+variable "additional_iam_policy_arns" {
+  type        = list(string)
+  default     = []
+  description = "Extra IAM managed policy ARNs to attach to the EC2 role (e.g. CloudWatch agent, custom policies)"
 }
 
 variable "agent_api_base_url" {

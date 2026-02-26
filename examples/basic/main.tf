@@ -28,7 +28,5 @@ module "chat_ui_ec2" {
 
   create_execute_api_vpce = var.create_execute_api_vpce
 
-  iam_instance_profile_name = var.iam_instance_profile_name
-
   tags = var.tags
 }

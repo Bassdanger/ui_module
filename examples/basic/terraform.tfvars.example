@@ -22,8 +22,6 @@ agent_api_auth_mode = "iam"
 
 create_execute_api_vpce = true
 
-iam_instance_profile_name = "streamlit-ui-role"
-
 tags = {
   Environment = "dev"
   Project     = "chatbot-ui"
