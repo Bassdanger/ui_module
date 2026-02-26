@@ -129,6 +129,7 @@ See [`infra/chat_ui_ec2/variables.tf`](infra/chat_ui_ec2/variables.tf) for the f
 |---|---|---|---|
 | `vpc_id` | `string` | Yes | Existing VPC ID |
 | `private_subnet_ids` | `list(string)` | Yes | Exactly 2 private subnet IDs |
+| `vpc_cidrs` | `list(string)` | Yes | VPC CIDR blocks for SG ingress rules |
 | `ami_id` | `string` | Yes | Custom RHEL AMI ID |
 | `region` | `string` | Yes | AWS region |
 | `create_execute_api_vpce` | `bool` | No (default `true`) | Create execute-api VPC endpoint |

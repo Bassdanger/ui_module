@@ -35,10 +35,9 @@ variable "ui_port" {
   description = "Port Streamlit listens on"
 }
 
-variable "vpc_cidr" {
-  type        = string
-  default     = "10.0.0.0/16"
-  description = "VPC CIDR block used for security group ingress rules"
+variable "vpc_cidrs" {
+  type        = list(string)
+  description = "VPC CIDR blocks used for security group ingress rules"
 }
 
 variable "iam_instance_profile_name" {

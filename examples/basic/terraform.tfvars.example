@@ -4,7 +4,10 @@
 region = "us-east-1"
 
 vpc_id   = "vpc-0123456789abcdef0"
-vpc_cidr = "10.0.0.0/16"
+vpc_cidrs = [
+  "10.0.0.0/16",   # primary VPC CIDR
+  "10.1.0.0/16",   # secondary VPC CIDR
+]
 
 private_subnet_ids = [
   "subnet-aaaa1111aaaa1111a", # private subnet — AZ 1

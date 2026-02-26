@@ -20,7 +20,7 @@ module "chat_ui_ec2" {
   private_subnet_ids = var.private_subnet_ids
   ami_id             = var.ami_id
   region             = var.region
-  vpc_cidr           = var.vpc_cidr
+  vpc_cidrs          = var.vpc_cidrs
   instance_type      = var.instance_type
 
   agent_api_base_url  = var.agent_api_base_url

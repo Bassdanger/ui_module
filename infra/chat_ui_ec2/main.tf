@@ -37,14 +37,16 @@ resource "aws_security_group" "ui" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "ui_from_vpc" {
+  for_each = toset(var.vpc_cidrs)
+
   security_group_id = aws_security_group.ui.id
-  description       = "Allow Streamlit port from VPC CIDR"
+  description       = "Allow Streamlit port from ${each.value}"
   from_port         = var.ui_port
   to_port           = var.ui_port
   ip_protocol       = "tcp"
-  cidr_ipv4         = var.vpc_cidr
+  cidr_ipv4         = each.value
 
-  tags = merge(local.common_tags, { Name = "${local.name_prefix}-ingress-ui" })
+  tags = merge(local.common_tags, { Name = "${local.name_prefix}-ingress-ui-${replace(each.value, "/", "-")}" })
 }
 
 resource "aws_vpc_security_group_egress_rule" "ui_all_outbound" {

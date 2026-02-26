@@ -18,10 +18,9 @@ variable "region" {
   description = "AWS region"
 }
 
-variable "vpc_cidr" {
-  type        = string
-  default     = "10.0.0.0/16"
-  description = "VPC CIDR for security group rules"
+variable "vpc_cidrs" {
+  type        = list(string)
+  description = "VPC CIDR blocks for security group rules"
 }
 
 variable "instance_type" {
