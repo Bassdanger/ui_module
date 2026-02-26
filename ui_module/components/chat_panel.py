@@ -12,6 +12,12 @@ def render_chat_panel() -> None:
     if "messages" not in st.session_state:
         st.session_state["messages"] = []
 
+    active_session = st.session_state.get("active_session_id")
+
+    if not active_session:
+        st.info("Create or select a session from the sidebar to start chatting.")
+        return
+
     for msg in st.session_state["messages"]:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
@@ -23,7 +29,7 @@ def render_chat_panel() -> None:
 
         with st.chat_message("assistant"):
             with st.spinner("Thinking…"):
-                extra_kwargs = {}
+                extra_kwargs: dict = {}
                 if "temperature" in st.session_state:
                     extra_kwargs["temperature"] = st.session_state["temperature"]
                 if "system_prompt" in st.session_state:
@@ -31,6 +37,7 @@ def render_chat_panel() -> None:
 
                 response = invoke_agent(
                     st.session_state["messages"],
+                    session_id=active_session,
                     **extra_kwargs,
                 )
             st.markdown(response)
